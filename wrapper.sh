@@ -38,6 +38,12 @@ call_vault_api() {
     rm -f "$response"
   }
 
+  report() {
+    log "Vault request $request_url failed"
+    exit 1
+  }
+
+  trap report ERR
   trap cleanup EXIT
 
   local extra_options=""
@@ -60,20 +66,14 @@ call_vault_api() {
     extra_options+=" -H \"X-Vault-Token: $token\""
   fi
 
-  curl_cmd="curl -s $extra_options -o $response \"$request_url\""
-  if ! eval $curl_cmd; then
-    log "Vault request $request_url failed"
+  code="$(eval "curl -s -w "%{response_code}" $extra_options -o $response $request_url")"
+
+  if [ "$code" -ge "400" ]; then
+      log "Error($code):\n $(jq .errors $response)"
     exit 1
-  fi
-
-  errors="$(jq ".errors" $response)"
-
-  if [ "$errors" == "" ] || [ "$errors" == "null" ]; then
-    log "Success"
-    jq -c '.' $response
   else
-    log "Error:\n $errors"
-    exit 1
+    log "Success($code)"
+    jq -c '.' $response
   fi
 
   cleanup
@@ -87,7 +87,7 @@ fetch_secrets() {
   log "Login..."
   token="$(call_vault_api "$host" "auth/approle/login" "" "{\"role_id\":\"$role_id\",\"secret_id\":\"$secret_id\"}" | jq -r '.auth.client_token')"
   log "Get secrets list..."
-  secrets="$(call_vault_api "$host" "$path" "$token" "" "LIST" | jq -r '.data.keys[]')"
+  secrets="$(call_vault_api "$host" "$path" "${token}" "" "LIST" | jq -r '.data.keys[]')"
   log "Inject secrets..."
   for secret in $secrets; do
     log "Injecting \"$secret\"..."
