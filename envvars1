@@ -1,0 +1,5 @@
+VAULT_URL="http://127.0.0.1:8200"
+KV_PATH_PREFIX="ci-kv/dev_team_a/project_x"
+APP_ROLE_ID="cfd467c9-821d-6b13-1c37-187e40cb81db"
+APP_ROLE_SECRET_ID="e7957891-433f-59c0-4b02-46f7fd2bd631"
+ENVIRONMENT="production"
