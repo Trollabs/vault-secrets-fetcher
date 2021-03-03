@@ -2,7 +2,7 @@
 
 Wrapper script that fetches secrets from Vault and exports them as environment variables. Check out [my blog post](https://trollab.ca/posts/ci_secrets_from_vault) on this for more details.
 
-Vault URL, KV path and credentials are in `envvars` file but can be easily read from environment variables if you keep envvars
+Vault URL, KV path and credentials are in `envvars` file but can be easily read from environment variables if you keep `envvars` file empty.
 
 
 ## How to test it out
